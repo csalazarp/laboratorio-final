@@ -7,12 +7,13 @@ on:
   
 jobs:
   build:
+    runs-on: ubuntu-latest
     container:
       image: node:19-alpine3.15
     steps:
       - name: Copiar el código del repositorio
         uses: actions/checkout@v3
         
-      - name: Instlar las dependencias
+      - name: Instalar las dependencias
         run: npm install
         

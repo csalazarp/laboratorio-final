@@ -1,0 +1,18 @@
+name: Trabajo final DevSecOps - USACH
+
+on:
+  push:
+    branches:
+      - revisiones
+  
+jobs:
+  build:
+    container:
+      image: node:19-alpine3.15
+    steps:
+      - name: Copiar el código del repositorio
+        uses: actions/checkout@v3
+        
+      - name: Instlar las dependencias
+        run: npm install
+        

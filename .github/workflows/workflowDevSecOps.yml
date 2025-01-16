@@ -4,18 +4,23 @@ on:
   push:
     branches:
       - revisiones
-  
+
+name: Build
+on:
+  push:
+    branches:
+      - revisiones
+  pull_request:
+    types: [opened, synchronize, reopened]
 jobs:
-  build:
+  sonarqube:
+    name: SonarQube
     runs-on: ubuntu-latest
-    container:
-      image: node:19-alpine3.15
     steps:
-      - name: Copiar el código del repositorio
-        uses: actions/checkout@v3
-        
-      - name: Instalar las dependencias
-        run: npm install
-        
-      - name: Crear proyecto en sonar cloud
-        run: curl -f -X POST -u ${{ secrets.TOKEN_SONAR }}: -D - "https://sonarcloud.io/api/projects/create?name=${{ github.event.repository.name }&organization=csalazarp&visibility=public"
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

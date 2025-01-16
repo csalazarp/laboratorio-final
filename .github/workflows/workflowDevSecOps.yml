@@ -17,3 +17,5 @@ jobs:
       - name: Instalar las dependencias
         run: npm install
         
+      - name: Crear proyecto en sonar cloud
+        run: curl -f -X POST -u ${{ secrets.TOKEN_SONAR }}: "https://sonarcloud.io/api/projects/create" -d 'name=${{ github.event.repository.name }' -d 'organization=csalazarp' -d 'visibility=public'

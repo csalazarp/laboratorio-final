@@ -4,12 +4,6 @@ on:
   push:
     branches:
       - revisiones
-
-name: Build
-on:
-  push:
-    branches:
-      - revisiones
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:

@@ -2,7 +2,7 @@ name: Script DevSecOps USACH
 
 on:
   push:
-    branches: [ revisiones ]
+    branches: [ main ]
 
 jobs:
   sonarcloud-analysis:
@@ -32,7 +32,7 @@ jobs:
           args: >
             -Dsonar.organization=devsecops-usach
             -Dsonar.projectKey=devsecops-usach_laboratorio-final
-            -Dsonar.branch.name=revisiones
+            -Dsonar.branch.name=main
 
 
       - name: Revision de resultado de SonarQube

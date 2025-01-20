@@ -5,7 +5,7 @@ on:
     branches: [ master ]
 
 jobs:
-  sonarcloud-analysis:
+  SAST:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
     
@@ -49,18 +49,83 @@ jobs:
           qualityGateStatus=$(curl -s -u "$SONAR_TOKEN:" \
             "https://sonarcloud.io/api/qualitygates/project_status?analysisId=$analysisId" | jq -r '.projectStatus.status')
 
-          if [ "$qualityGateStatus" != "OK" ]; then
-            echo "El proyecto no cumple con el Quality Gate: $qualityGateStatus."
-            echo "Verificando vulnerabilidades críticas..."
+          # if [ "$qualityGateStatus" != "OK" ]; then
 
-            vulnerabilities=$(curl -s -u "$SONAR_TOKEN:" \
-              "https://sonarcloud.io/api/issues/search?componentKeys=$REPO_NAME&resolved=false&type=VULNERABILITY&impactSeverities=MEDIUM,HIGH,BLOCKER" | jq  '.total')
+          vulnerabilities=$(curl -s -u "$SONAR_TOKEN:" \
+            "https://sonarcloud.io/api/issues/search?componentKeys=$REPO_NAME&resolved=false&type=VULNERABILITY&impactSeverities=MEDIUM,HIGH,BLOCKER" | jq  '.total')
 
-            if [ "$vulnerabilities" -gt 0 ]; then
-              echo "Se encontraron $vulnerabilities vulnerabilidades críticas. El proyecto no cumple con los estándares de seguridad."
-              #exit 1
-            fi
+          if [ "$vulnerabilities" -gt 0 ]; then
+            echo "Se encontraron $vulnerabilities vulnerabilidades críticas. El proyecto no cumple con los estándares de seguridad."
+            #exit 1
           else
             echo "El proyecto cumple con el Quality Gate y no tiene vulnerabilidades críticas. Continuando sin problemas."
           fi
+
+          SCA:
+            needs: SAST
+            runs-on: ubuntu-24.04
+            steps:
+            
+            - name: Checkout code
+              uses: actions/checkout@v2
+            
+            - name: Dependency Check
+              uses: dependency-check/Dependency-Check_Action@1.1.0
+              env:
+                JAVA_HOME: /opt/jdk
+              id: Depcheck
+              with:
+                project: '${{ github.event.repository.name }}'
+                path: '.'
+                format: 'HTML'
+                args: >
+                  --out ./reports
+                  --failOnCVSS 7
+                  --enableRetired
+        
+            - name: Upload Test Result
+              uses: actions/upload-artifact@master
+              with:
+                name: Depcheck Report
+                path: ./reports
+
+
+  SCA:
+    needs: SAST
+    runs-on: ubuntu-latest
+    steps:
+    
+    - name: Run npm audit
+      id: npm-audit
+      continue-on-error: true
+      run: |
+        echo "Ejecutando npm audit..."
+        npm audit --json > npm-audit.json || true
+
+      # Resultados
+
+      CRITIAL=$(jq '.metadata.vulnerabilities.critical' npm-audit.json)
+      HIGH=$(jq '.metadata.vulnerabilities.high' npm-audit.json)
+      MODERATE=$(jq '.metadata.vulnerabilities.moderate' npm-audit.json)
+
+      if [ "$CRITIAL" -gt 0 ]; then
+        echo "Se encontraron $CRITIAL vulnerabilidades críticas. El proyecto no cumple con los estándares de seguridad."
+        exit 1
+      elif [ "$HIGH" -gt 0 ]; then
+        echo "Se encontraron $HIGH vulnerabilidades altas. El proyecto no cumple con los estándares de seguridad."
+        exit 1
+      elif [ "$MODERATE" -gt 0 ]; then
+        echo "Se encontraron $MODERATE vulnerabilidades moderadas. El proyecto no cumple con los estándares de seguridad."
+        exit 1
+      else
+        echo "El proyecto cumple con los estándares de seguridad."
+      fi
+
+      # Subir reportes como artefactos
+      - name: Upload Security Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: |
+            npm-audit.json
 

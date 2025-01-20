@@ -3,8 +3,6 @@ name: Node.js CI with SonarCloud Analysis
 on:
   push:
     branches: [ revisiones ]
-  pull_request:
-    branches: [ revisiones ]
 
 jobs:
   sonarcloud-analysis:
@@ -26,8 +24,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
-      
+      - name: Run tests with coverage
+        run: npm run test:coverage
+        
       - name: SonarCloud Scan
-        uses: SonarSource/laboratorio-final@revisiones
+        uses: sonarSource/sonarqube-scan-action@v4
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=devsecops-usach
+            -Dsonar.projectKey=devsecops-usach_laboratorio-final
+            -Dsonar.branch.name=revisiones

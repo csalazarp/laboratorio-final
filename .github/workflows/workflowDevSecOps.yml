@@ -39,10 +39,10 @@ jobs:
         if: steps.sonarqube-quality-gate-check.outputs.quality-gate-status != 'OK'
         run: |
 
-          echo "steps: ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
+          echo "steps: $steps.sonarqube-quality-gate-check.outputs.quality-gate-status"
           sudo apt-get install -y jq
           RESULTADO=$(curl -s -u ${SONAR_TOKEN}: \
-            "https://sonarcloud.io/api/issues/search?componentKeys=devsecops-usach_laboratorio-final&resolved=false&type=VULNERABILITY&severities=MEDIUM,HIGH,BLOCKER")
+            "https://sonarcloud.io/api/issues/search?componentKeys=&resolved=false&type=VULNERABILITY&severities=MEDIUM,HIGH,BLOCKER")
           
           MEDIUM=$(echo $RESULTADO | jq '[.issues[] | select(.severity=="MEDIUM")] | length')
           HIGH=$(echo $RESULTADO | jq '[.issues[] | select(.severity=="HIGH")] | length')

@@ -36,7 +36,7 @@ jobs:
 
       - name: SonarQube Quality Gate
         id: quality-gate
-        uses: sonarSource/sonarqube-quality-gate-action
+        uses: sonarSource/sonarqube-quality-gate-action@revisiones
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           

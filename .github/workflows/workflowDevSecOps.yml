@@ -71,8 +71,9 @@ jobs:
         continue-on-error: true
         run: |
           echo "Ejecutando npm audit..."
-          npm audit --json > npm-audit.json || true
           npm install --package-lock-only
+          npm audit --json > npm-audit.json || true
+          
 
           # Resultados
 

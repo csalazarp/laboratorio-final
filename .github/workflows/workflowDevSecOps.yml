@@ -34,7 +34,7 @@ jobs:
             -Dsonar.projectKey=devsecops-usach_laboratorio-final
             -Dsonar.branch.name=revisiones
 
-     - name: Revision de resultado de SonarQube
+      - name: Revision de resultado de SonarQube
         if: steps.sonarqube-quality-gate-check.outputs.quality-gate-status != 'OK'
         run: |
           echo "Quality Gate failed!"

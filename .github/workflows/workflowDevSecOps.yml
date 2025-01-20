@@ -104,22 +104,22 @@ jobs:
 
       # Resultados
 
-      CRITIAL=$(jq '.metadata.vulnerabilities.critical' npm-audit.json)
-      HIGH=$(jq '.metadata.vulnerabilities.high' npm-audit.json)
-      MODERATE=$(jq '.metadata.vulnerabilities.moderate' npm-audit.json)
+        CRITIAL=$(jq '.metadata.vulnerabilities.critical' npm-audit.json)
+        HIGH=$(jq '.metadata.vulnerabilities.high' npm-audit.json)
+        MODERATE=$(jq '.metadata.vulnerabilities.moderate' npm-audit.json)
 
-      if [ "$CRITIAL" -gt 0 ]; then
-        echo "Se encontraron $CRITIAL vulnerabilidades críticas. El proyecto no cumple con los estándares de seguridad."
-        exit 1
-      elif [ "$HIGH" -gt 0 ]; then
-        echo "Se encontraron $HIGH vulnerabilidades altas. El proyecto no cumple con los estándares de seguridad."
-        exit 1
-      elif [ "$MODERATE" -gt 0 ]; then
-        echo "Se encontraron $MODERATE vulnerabilidades moderadas. El proyecto no cumple con los estándares de seguridad."
-        exit 1
-      else
-        echo "El proyecto cumple con los estándares de seguridad."
-      fi
+        if [ "$CRITIAL" -gt 0 ]; then
+          echo "Se encontraron $CRITIAL vulnerabilidades críticas. El proyecto no cumple con los estándares de seguridad."
+          exit 1
+        elif [ "$HIGH" -gt 0 ]; then
+          echo "Se encontraron $HIGH vulnerabilidades altas. El proyecto no cumple con los estándares de seguridad."
+          exit 1
+        elif [ "$MODERATE" -gt 0 ]; then
+          echo "Se encontraron $MODERATE vulnerabilidades moderadas. El proyecto no cumple con los estándares de seguridad."
+          exit 1
+        else
+          echo "El proyecto cumple con los estándares de seguridad."
+        fi
 
       # Subir reportes como artefactos
       - name: Upload Security Reports

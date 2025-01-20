@@ -58,7 +58,7 @@ jobs:
 
             echo "Vulnerabilidades: $vulnerabilities"
 
-            cantidad= $vulnerabilities | jq  '.total')
+            cantidad= $vulnerabilities | jq  '.total'
 
             echo "Cantidad de vulnerabilidades: $cantidad"
 

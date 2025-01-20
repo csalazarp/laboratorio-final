@@ -34,9 +34,17 @@ jobs:
             -Dsonar.projectKey=devsecops-usach_laboratorio-final
             -Dsonar.branch.name=revisiones
 
+      - name: SonarQube Quality Gate
+        id: quality-gate
+        uses: sonarsource/sonarqube-quality-gate-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          
       - name: Revision de resultado de SonarQube
         if: steps.sonarqube-quality-gate-check.outputs.quality-gate-status != 'OK'
         run: |
+
+          sudo apt-get install -y jq
           RESULTADO=$(curl -s -u ${SONAR_TOKEN}: \
             "https://sonarcloud.io/api/issues/search?componentKeys=devsecops-usach_laboratorio-final&resolved=false&type=VULNERABILITY&severities=MEDIUM,HIGH,BLOCKER")
           

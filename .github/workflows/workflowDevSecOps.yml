@@ -35,51 +35,24 @@ jobs:
             -Dsonar.branch.name=revisiones
 
 
-      - name: Validate Quality Gate
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          REPO_NAME: devsecops-usach_laboratorio-final
+      - name: Revision de resultado de SonarQube
+        if: steps.sonarqube-quality-gate-check.outputs.quality-gate-status != 'OK'
         run: |
-          echo "Validando el estado del Quality Gate..."
-          analysisId=$(curl -s -u "$SONAR_TOKEN:" \
-            "https://sonarcloud.io/api/ce/component?component=devsecops-usach_laboratorio-final" | jq -r '.current.analysisId')
 
-          echo "Analysis ID: $analysisId"
-
-          qualityGateStatus=$(curl -s -u "$SONAR_TOKEN:" \
-            "https://sonarcloud.io/api/qualitygates/project_status?analysisId=$analysisId" | jq -r '.projectStatus.status')
-
-          if [ "$qualityGateStatus" != "OK" ]; then
-            echo "El proyecto no cumple con el Quality Gate: $qualityGateStatus."
-            echo "Verificando vulnerabilidades críticas..."
-            vulnerabilities=$(curl -s -u "$SONAR_TOKEN:" \
-              "https://sonarcloud.io/api/issues/search?componentKeys=$REPO_NAME&types=VULNERABILITY&severities=CRITICAL,BLOCKER" | jq -r '.total')
-
-            if [ "$vulnerabilities" -gt 0 ]; then
-              echo "Se encontraron $vulnerabilities vulnerabilidades críticas. El proyecto no cumple con los estándares de seguridad."
-              #exit 1
-            fi
-          else
-            echo "El proyecto cumple con el Quality Gate y no tiene vulnerabilidades críticas. Continuando sin problemas."
-          fi
-
-      # - name: Revision de resultado de SonarQube
-      #   if: steps.sonarqube-quality-gate-check.outputs.quality-gate-status != 'OK'
-      #   run: |
-
-      #     sudo apt-get install -y jq
-      #     RESULTADO=$(curl -s -u ${SONAR_TOKEN}: \
-      #       "https://sonarcloud.io/api/issues/search?componentKeys=devsecops-usach_laboratorio-final&resolved=false&type=VULNERABILITY&severities=MEDIUM,HIGH,BLOCKER")
+          echo "steps: ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
+          sudo apt-get install -y jq
+          RESULTADO=$(curl -s -u ${SONAR_TOKEN}: \
+            "https://sonarcloud.io/api/issues/search?componentKeys=devsecops-usach_laboratorio-final&resolved=false&type=VULNERABILITY&severities=MEDIUM,HIGH,BLOCKER")
           
-      #     MEDIUM=$(echo $RESULTADO | jq '[.issues[] | select(.severity=="MEDIUM")] | length')
-      #     HIGH=$(echo $RESULTADO | jq '[.issues[] | select(.severity=="HIGH")] | length')
-      #     BLOCKER=$(echo $RESULTADO | jq '[.issues[] | select(.severity=="BLOCKER")] | length')
+          MEDIUM=$(echo $RESULTADO | jq '[.issues[] | select(.severity=="MEDIUM")] | length')
+          HIGH=$(echo $RESULTADO | jq '[.issues[] | select(.severity=="HIGH")] | length')
+          BLOCKER=$(echo $RESULTADO | jq '[.issues[] | select(.severity=="BLOCKER")] | length')
 
-      #     NUM_VULNERABILIDADES=$RESULTADO | jq '.total'
+          NUM_VULNERABILIDADES=$RESULTADO | jq '.total'
 
-      #     echo "Se encontraron vulnerabilidades en el código!!! "
-      #     echo "Se detuvo la ejecución del pipeline"
-      #     echo "$MEDIUM $HIGH $BLOCKER"
-      #     echo "Total de vulnerabilidades: $NUM_VULNERABILIDADES"
-      #     echo "$steps.sonarqube-quality-gate-check.outputs.quality-gate-status"
-      #     exit 1
+          echo "Se encontraron vulnerabilidades en el código!!! "
+          echo "Se detuvo la ejecución del pipeline"
+          echo "$MEDIUM $HIGH $BLOCKER"
+          echo "Total de vulnerabilidades: $NUM_VULNERABILIDADES"
+          echo "$steps.sonarqube-quality-gate-check.outputs.quality-gate-status"
+          exit 1

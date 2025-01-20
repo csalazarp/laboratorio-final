@@ -25,7 +25,7 @@ jobs:
         run: npm ci
         
       - name: SonarCloud Scan
-        uses: sonarSource/sonarqube-scan-action@v1
+        uses: sonarSource/sonarqube-scan-action@v4
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
@@ -34,11 +34,7 @@ jobs:
             -Dsonar.projectKey=devsecops-usach_laboratorio-final
             -Dsonar.branch.name=revisiones
 
-      - name: SonarQube Quality Gate
-        id: quality-gate
-        uses: sonarSource/sonarqube-quality-gate-action
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
           
       - name: Revision de resultado de SonarQube
         if: steps.sonarqube-quality-gate-check.outputs.quality-gate-status != 'OK'

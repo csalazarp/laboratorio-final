@@ -38,14 +38,17 @@ jobs:
         if: steps.sonarqube-quality-gate-check.outputs.quality-gate-status != 'OK'
         run: |
           RESULTADO=$(curl -s -u ${SONAR_TOKEN}: \
-            "https://sonarcloud.io/api/issues/search?componentKeys=devsecops-usach_laboratorio-final&resolved=false&impactSeverities=MEDIUM,HIGH,BLOCKER")
+            "https://sonarcloud.io/api/issues/search?componentKeys=devsecops-usach_laboratorio-final&resolved=false&type=VULNERABILITY&severities=MEDIUM,HIGH,BLOCKER")
           
           MEDIUM=$(echo $RESULTADO | jq '[.issues[] | select(.severity=="MEDIUM")] | length')
           HIGH=$(echo $RESULTADO | jq '[.issues[] | select(.severity=="HIGH")] | length')
           BLOCKER=$(echo $RESULTADO | jq '[.issues[] | select(.severity=="BLOCKER")] | length')
 
+          NUM_VULNERABILIDADES = RESULTADO | jq '.total'
+
           echo "Se encontraron vulnerabilidades en el código!!! "
           echo "Se debuto la ejecución del pipeline"
           echo "$MEDIUM $HIGH $BLOCKER"
+          echo "Total de vulnerabilidades: $NUM_VULNERABILIDADES"
           echo "$steps.sonarqube-quality-gate-check.outputs.quality-gate-status"
           exit 1
